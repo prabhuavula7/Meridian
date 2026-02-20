@@ -34,10 +34,10 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --watchAll=false --passWithNoTests",
-    "eject": "react-scripts eject"
+    "start": "BROWSER=none node ../scripts/with-root-env.js react-scripts start",
+    "build": "node ../scripts/with-root-env.js react-scripts build",
+    "test": "node ../scripts/with-root-env.js react-scripts test --watchAll=false --passWithNoTests",
+    "eject": "node ../scripts/with-root-env.js react-scripts eject"
   },
   "eslintConfig": {
     "extends": [

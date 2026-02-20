@@ -153,7 +153,7 @@ export class AnalysisController {
       'Failed to parse OpenAI response': 'The analysis service encountered an error. Please try again.',
       'Failed to transform OpenAI response': 'The analysis results could not be processed. Please try again.',
       'OpenAI API authentication failed': 'The analysis service is experiencing authentication issues. Please contact support.',
-      'OpenAI API key not configured': 'Backend OpenAI API key is not configured. Set OPENAI_API_KEY in backend/.env.',
+      'OpenAI API key not configured': 'Backend OpenAI API key is not configured. Set OPENAI_API_KEY in root .env.',
       'OpenAI API rate limit exceeded': 'The analysis service is currently busy. Please try again in a few minutes.',
       'OpenAI API server error': 'The AI analysis service is experiencing technical difficulties. Please try again later.',
       'OpenAI API temporarily unavailable': 'The AI analysis service is temporarily unavailable. Please try again later.',

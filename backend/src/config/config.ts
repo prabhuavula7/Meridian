@@ -7,10 +7,16 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-const backendRoot = path.resolve(__dirname, '..', '..');
-const backendEnvPath = path.join(backendRoot, '.env');
-const rootEnvPath = path.join(backendRoot, '..', '.env');
-const frontendEnvPath = path.join(backendRoot, '..', 'frontend', '.env');
+const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
+const rootEnvPath = path.join(workspaceRoot, '.env');
+const rootEnvLoaded = fs.existsSync(rootEnvPath);
+
+if (rootEnvLoaded) {
+  dotenv.config({ path: rootEnvPath });
+} else {
+  console.warn(`[config] Root .env not found at ${rootEnvPath}; using existing process env only.`);
+}
+
 const debugLogsEnabled = process.env['DEBUG_LOGS'] !== 'false';
 
 const configLog = (message: string, details?: Record<string, unknown>): void => {
@@ -26,19 +32,8 @@ const configLog = (message: string, details?: Record<string, unknown>): void => 
   console.log(`[config] ${message}`);
 };
 
-if (fs.existsSync(backendEnvPath)) {
-  dotenv.config({ path: backendEnvPath });
-  configLog('Loaded backend .env file', { path: backendEnvPath });
-}
-
-if (fs.existsSync(rootEnvPath)) {
-  dotenv.config({ path: rootEnvPath });
+if (rootEnvLoaded) {
   configLog('Loaded root .env file', { path: rootEnvPath });
-}
-
-if (fs.existsSync(frontendEnvPath)) {
-  dotenv.config({ path: frontendEnvPath });
-  configLog('Loaded frontend .env file', { path: frontendEnvPath });
 }
 
 export interface Config {

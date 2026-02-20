@@ -2,6 +2,8 @@
 
 This directory contains the Phase 0A FastAPI scaffold for the Meridian AI Python backend.
 
+Environment variables are sourced from the repository root `.env`.
+
 ## What is implemented
 
 - FastAPI app bootstrap.
@@ -33,8 +35,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ## Environment
 
 ```bash
+# from repository root
 cp .env.example .env
 ```
 
 `DATABASE_URL` and `REDIS_URL` are optional for this scaffold. If absent, health checks return `skipped`.
-

@@ -104,7 +104,7 @@ const AdminSettingsPanel = ({ onConfigComplete }) => {
     mapToken !== 'your_mapbox_access_token_here' &&
     mapToken.trim().length > 20
   );
-  const mapTokenSource = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN ? 'frontend/.env' : 'mapConfig fallback';
+  const mapTokenSource = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN ? 'root .env' : 'mapConfig fallback';
   const maskedMapToken = hasMapToken
     ? `${mapToken.slice(0, 8)}...${mapToken.slice(-4)}`
     : 'Not configured';

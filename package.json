@@ -6,6 +6,7 @@
   "description": "Meridian AI workspace with React frontend and TypeScript backend",
   "scripts": {
     "install:all": "npm --prefix frontend install && npm --prefix backend install",
+    "setup:env": "cp .env.example .env",
     "start": "npm --prefix frontend start",
     "start:backend": "npm --prefix backend start",
     "dev": "echo \"Use separate terminals: npm run dev:backend and npm run dev:frontend\"",

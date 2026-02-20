@@ -44,6 +44,13 @@ This repo is **npm-only**.
 - Do not use `yarn` or `pnpm` here.
 - Lockfiles are npm lockfiles (`package-lock.json`) at root, frontend, and backend.
 
+## Environment Policy
+
+This repo is **root `.env` only**.
+
+- Use `/.env` as the single source of truth for frontend, `backend/`, and `backend_py/`.
+- Do not maintain separate `frontend/.env`, `backend/.env`, or `backend_py/.env` files.
+
 ## Setup
 
 ### 1) Install dependencies
@@ -55,17 +62,14 @@ npm run install:all
 ### 2) Environment files
 
 ```bash
-cp frontend/.env.example frontend/.env
-cp backend/.env.example backend/.env
+npm run setup:env
 ```
 
 Minimum recommended values:
 
-- `frontend/.env`
-  - `REACT_APP_API_BASE_URL=http://localhost:5050/api/v1`
-  - `REACT_APP_MAPBOX_ACCESS_TOKEN=...` (recommended for map rendering)
-- `backend/.env`
-  - `OPENAI_API_KEY=...`
+- `REACT_APP_API_BASE_URL=http://localhost:5050/api/v1`
+- `REACT_APP_MAPBOX_ACCESS_TOKEN=...` (recommended for map rendering)
+- `OPENAI_API_KEY=...`
 
 ## Run Locally
 
@@ -90,7 +94,6 @@ Run in a separate terminal:
 
 ```bash
 cd backend_py
-cp .env.example .env
 uv sync
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
@@ -112,7 +115,7 @@ npm test
 1. Open `http://localhost:3000`.
 2. Toggle light/dark theme and refresh (theme persists).
 3. Upload sample data and verify Dashboard KPIs/charts render.
-4. Confirm map renders (if not, set `REACT_APP_MAPBOX_ACCESS_TOKEN` and restart frontend).
+4. Confirm map renders (if not, set `REACT_APP_MAPBOX_ACCESS_TOKEN` in root `.env` and restart frontend).
 5. Open Insights and verify filter + lane table interactions.
 6. Open Disruption Detail and verify timeline/action dialog behavior.
 
@@ -125,6 +128,7 @@ Legacy frontend modules from earlier map/analysis implementations were removed f
 Root:
 
 - `npm run install:all`
+- `npm run setup:env`
 - `npm run dev:frontend`
 - `npm run dev:backend`
 - `npm run build`

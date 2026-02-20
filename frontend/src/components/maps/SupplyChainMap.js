@@ -283,7 +283,7 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
           <AlertTriangle size={22} className="text-danger" />
           <h3 className="mt-3 font-display text-lg font-semibold">Mapbox token is missing</h3>
           <p className="mt-2 text-sm text-foreground-muted">
-            Set <code>REACT_APP_MAPBOX_ACCESS_TOKEN</code> in <code>frontend/.env</code> (or update <code>MAP_CONFIG.MAPBOX_ACCESS_TOKEN</code>) and restart the frontend server.
+            Set <code>REACT_APP_MAPBOX_ACCESS_TOKEN</code> in root <code>.env</code> (or update <code>MAP_CONFIG.MAPBOX_ACCESS_TOKEN</code>) and restart the frontend server.
           </p>
         </div>
       </div>
