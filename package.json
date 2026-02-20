@@ -6,7 +6,7 @@
   "description": "Meridian AI workspace with React frontend and TypeScript backend",
   "scripts": {
     "install:all": "npm --prefix frontend install && npm --prefix backend install",
-    "setup:env": "cp .env.example .env",
+    "setup:env": "sh -c 'if [ -f .env ]; then echo \".env already exists (leaving it unchanged)\"; else cp .env.example .env && echo \"Created .env from .env.example\"; fi'",
     "start": "npm --prefix frontend start",
     "start:backend": "npm --prefix backend start",
     "start:backend:py": "node scripts/with-root-env.js sh -c \"cd backend_py && python3 -m uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8000}\"",

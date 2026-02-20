@@ -67,3 +67,4 @@ backend/.cache/
 
 # Local generated data
 supply_chain_data.normalized.csv
+backend_py/data/

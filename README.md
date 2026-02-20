@@ -76,6 +76,11 @@ Minimum recommended values:
 - `FRONTEND_PORT=3000`
 - `LEGACY_BACKEND_BASE_URL=http://localhost:5050/api/v1` (for backend_py compatibility proxy)
 
+For Python ingestion/normalization APIs, point frontend to `backend_py`:
+
+- `REACT_APP_API_BASE_URL=http://localhost:8000/api/v1`
+- keep `LEGACY_BACKEND_BASE_URL=http://localhost:5050/api/v1` so `backend_py` can proxy route enrichment + analysis during migration.
+
 ## Run Locally
 
 Use two terminals:
@@ -128,6 +133,11 @@ Services:
 - `redis` (default port `6379`)
 - `backend_py_api` (default port `8000`)
 - `backend_py_worker` (background heartbeat worker)
+
+Notes:
+
+- Compose now persists Python ingestion artifacts in a named volume (`meridian_backend_py_data`) so uploads/normalization outputs survive container restarts.
+- To use `backend_py` endpoints directly from frontend, set `REACT_APP_API_BASE_URL=http://localhost:8000/api/v1` in root `.env` and restart frontend.
 
 ## Build and Test
 

@@ -38,6 +38,12 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      UPLOAD_STORAGE_DIR: /app/data/uploads
+      UPLOAD_MANIFEST_PATH: /app/data/ingestion_manifest.json
+      SILVER_STORAGE_DIR: /app/data/silver
+      QUARANTINE_STORAGE_DIR: /app/data/quarantine
+      NORMALIZATION_REPORT_DIR: /app/data/reports
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,6 +51,8 @@ services:
         condition: service_healthy
     ports:
       - "${APP_PORT:-8000}:8000"
+    volumes:
+      - meridian_backend_py_data:/app/data
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
@@ -59,14 +67,22 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      UPLOAD_STORAGE_DIR: /app/data/uploads
+      UPLOAD_MANIFEST_PATH: /app/data/ingestion_manifest.json
+      SILVER_STORAGE_DIR: /app/data/silver
+      QUARANTINE_STORAGE_DIR: /app/data/quarantine
+      NORMALIZATION_REPORT_DIR: /app/data/reports
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - meridian_backend_py_data:/app/data
     command: ["python", "-m", "app.workers.runner"]
 
 volumes:
   meridian_postgres_data:
   meridian_redis_data:
-
+  meridian_backend_py_data:
