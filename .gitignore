@@ -24,6 +24,13 @@ node_modules/
 frontend/node_modules/
 backend/node_modules/
 .npm/
+backend_py/.venv/
+backend_py/__pycache__/
+backend_py/**/__pycache__/
+backend_py/.pytest_cache/
+backend_py/.ruff_cache/
+backend_py/.mypy_cache/
+*.pyc
 
 # Package manager policy (npm-only repo)
 yarn.lock

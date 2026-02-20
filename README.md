@@ -1,6 +1,6 @@
 # Meridian AI
 
-Meridian AI is a monorepo for supply-chain disruption intelligence. It combines a React frontend (dashboard, maps, charts, lane intelligence) with a TypeScript/Express backend (route enrichment + AI analysis APIs).
+Meridian AI is a monorepo for supply-chain disruption intelligence. It combines a React frontend (dashboard, maps, charts, lane intelligence) with backend services for route enrichment, AI analysis, and the new Python migration scaffold.
 
 ## Architecture
 
@@ -8,6 +8,9 @@ Meridian AI is a monorepo for supply-chain disruption intelligence. It combines 
 - `backend/` Express + TypeScript API for:
   - route enrichment (`/api/v1/routes/enrich`)
   - AI analysis (`/api/v1/analyze-supply-chain`)
+- `backend_py/` FastAPI scaffold (Phase 0A) with:
+  - request-id middleware + JSON logging
+  - dependency-aware health checks (`/health`, `/api/v1/health`)
 - Root workspace scripts orchestrate frontend/backend via npm.
 
 ## Product Surfaces
@@ -32,6 +35,7 @@ Base URL: `http://localhost:5050/api/v1`
 
 - Node.js 18+
 - npm 10+
+- Python 3.11+ (for `backend_py`)
 
 ## Package Manager Policy
 
@@ -79,6 +83,22 @@ npm run dev:frontend
 
 Frontend: `http://localhost:3000`  
 Backend: `http://localhost:5050`
+
+## Python Backend Scaffold (Phase 0A)
+
+Run in a separate terminal:
+
+```bash
+cd backend_py
+cp .env.example .env
+uv sync
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Health endpoints:
+
+- `http://localhost:8000/health`
+- `http://localhost:8000/api/v1/health`
 
 ## Build and Test
 
