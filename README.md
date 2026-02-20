@@ -1,6 +1,6 @@
-# Supply Chain AI
+# Meridian AI
 
-Supply Chain AI is a monorepo application for uploading supply chain data, enriching routes, visualizing global logistics flows, and generating AI-driven risk analysis.
+Meridian AI is a monorepo application for uploading supply chain data, enriching routes, visualizing global logistics flows, and generating AI-driven risk analysis.
 
 The stack is intentionally split:
 
