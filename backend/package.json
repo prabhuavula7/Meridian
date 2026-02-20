@@ -1,7 +1,8 @@
 {
-  "name": "supply-chain-ai-backend",
+  "name": "meridian-ai-backend",
   "version": "1.0.0",
-  "description": "Backend API for Supply Chain AI Analysis with OpenAI GPT-4 integration",
+  "packageManager": "npm@10.9.3",
+  "description": "Backend API for Meridian AI analysis with OpenAI GPT-4 integration",
   "main": "dist/server.js",
   "scripts": {
     "clean": "rm -rf dist",
@@ -19,7 +20,7 @@
     "gpt-4",
     "analysis"
   ],
-  "author": "BentTech.AI Team",
+  "author": "Meridian AI Team",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",

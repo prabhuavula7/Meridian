@@ -59,7 +59,7 @@ const OSRM_BASE_URL = process.env['OSRM_BASE_URL'] || 'https://router.project-os
 const ROUTE_ENRICHMENT_SCHEMA_VERSION = 'v2';
 const ROUTE_HTTP_TIMEOUT_MS = parseInt(process.env['ROUTE_HTTP_TIMEOUT_MS'] || '15000', 10);
 const NOMINATIM_USER_AGENT =
-  process.env['NOMINATIM_USER_AGENT'] || 'BentTech.AI Supply Chain Route Service/1.0';
+  process.env['NOMINATIM_USER_AGENT'] || 'Meridian AI Supply Chain Route Service/1.0';
 
 const ENRICHMENT_CACHE_TTL_MS = parseInt(process.env['ROUTE_ENRICHMENT_CACHE_TTL_MS'] || String(60 * 60 * 1000), 10);
 const ENRICHMENT_CACHE_MAX_ENTRIES = parseInt(process.env['ROUTE_ENRICHMENT_CACHE_MAX_ENTRIES'] || '20', 10);

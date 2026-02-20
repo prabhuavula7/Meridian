@@ -1,4 +1,4 @@
-# BentTech.AI Supply Chain Intelligence Platform: End-to-End Build Gameplan
+# Meridian AI Supply Chain Intelligence Platform: End-to-End Build Gameplan
 
 ## 1. Document Purpose
 

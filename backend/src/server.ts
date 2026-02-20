@@ -71,7 +71,7 @@ app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
-    service: 'Supply Chain AI Backend',
+    service: 'Meridian AI Backend',
     version: '1.0.0',
     environment: config.server.nodeEnv,
     uptime: process.uptime(),
@@ -163,7 +163,7 @@ process.on('uncaughtException', (error) => {
 
 // Start server
 app.listen(config.server.port, () => {
-  console.log(`${logPrefix} Supply Chain AI Backend started successfully`);
+  console.log(`${logPrefix} Meridian AI Backend started successfully`);
   console.log(`${logPrefix} Environment`, { nodeEnv: config.server.nodeEnv });
   console.log(`${logPrefix} Server URL`, { url: `http://localhost:${config.server.port}` });
   console.log(`${logPrefix} Health URL`, { url: `http://localhost:${config.server.port}/health` });

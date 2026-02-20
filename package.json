@@ -1,8 +1,9 @@
 {
-  "name": "supply-chain-ai-workspace",
+  "name": "meridian-ai-workspace",
   "version": "1.0.0",
   "private": true,
-  "description": "Supply Chain AI workspace with React frontend and TypeScript backend",
+  "packageManager": "npm@10.9.3",
+  "description": "Meridian AI workspace with React frontend and TypeScript backend",
   "scripts": {
     "install:all": "npm --prefix frontend install && npm --prefix backend install",
     "start": "npm --prefix frontend start",
