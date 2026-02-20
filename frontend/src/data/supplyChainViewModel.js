@@ -30,6 +30,8 @@ const formatNumber = (value, fallback = 0) => {
   return Number.isFinite(numeric) ? numeric : fallback;
 };
 
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
 const normalizeText = (value) => String(value || '').trim().toLowerCase();
 
 const normalizeMode = (value) => {
@@ -73,6 +75,114 @@ const toLonLat = (value) => {
   }
 
   return null;
+};
+
+const parseStructuredValue = (value) => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch (_error) {
+    return value;
+  }
+};
+
+const toCoordinatePath = (value) => {
+  const parsed = parseStructuredValue(value);
+  if (!Array.isArray(parsed)) {
+    return [];
+  }
+
+  return parsed
+    .map((point) => {
+      if (Array.isArray(point)) {
+        return toLonLat(point);
+      }
+
+      if (point && typeof point === 'object') {
+        return toLonLat([
+          point.longitude ?? point.lon ?? point.lng,
+          point.latitude ?? point.lat,
+        ]);
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+};
+
+const providerImpliesFallback = (provider) => /fallback|land-corridor/i.test(String(provider || ''));
+
+const normalizeSegmentRole = (role, index) => {
+  const normalized = normalizeText(role);
+  if (normalized === 'access' || normalized === 'egress' || normalized === 'main' || normalized === 'connector') {
+    return normalized;
+  }
+
+  return index === 0 ? 'main' : 'connector';
+};
+
+const parseRouteSegments = (value, fallbackMode) => {
+  const parsed = parseStructuredValue(value);
+  if (!Array.isArray(parsed)) {
+    return [];
+  }
+
+  return parsed
+    .map((segment, index) => {
+      if (!segment || typeof segment !== 'object') {
+        return null;
+      }
+
+      const coordinates = toCoordinatePath(segment.coordinates);
+      if (coordinates.length < 2) {
+        return null;
+      }
+
+      const provider = String(segment.provider || 'unknown');
+      return {
+        id: `segment-${index}`,
+        mode: normalizeMode(segment.mode || fallbackMode),
+        role: normalizeSegmentRole(segment.segment_role || segment.role, index),
+        coordinates,
+        distanceKm: formatNumber(segment.distance_km ?? segment.distanceKm, 0),
+        durationMinutes: segment.duration_minutes === null
+          ? null
+          : formatNumber(segment.duration_minutes ?? segment.durationMinutes, 0),
+        provider,
+        isFallback: providerImpliesFallback(provider),
+      };
+    })
+    .filter(Boolean);
+};
+
+const mergeSegmentCoordinates = (segments) => {
+  const merged = [];
+
+  segments.forEach((segment) => {
+    segment.coordinates.forEach((coord) => {
+      const previous = merged[merged.length - 1];
+      if (!previous || previous[0] !== coord[0] || previous[1] !== coord[1]) {
+        merged.push(coord);
+      }
+    });
+  });
+
+  return merged;
+};
+
+const getRiskLevel = (riskScore) => {
+  if (riskScore <= 0.35) return 'low';
+  if (riskScore <= 0.7) return 'medium';
+  return 'high';
+};
+
+const getQualityTier = (score) => {
+  if (score >= 0.72) return 'strong';
+  if (score >= 0.5) return 'watch';
+  return 'fragile';
 };
 
 const resolveFallbackCoords = (label) => {
@@ -173,6 +283,29 @@ export const buildSupplyChainModel = (rows = []) => {
     const riskScore = formatNumber(row.route_risk_score, (hashFromString(`${originLabel}${destinationLabel}`) % 70) / 100 + 0.2);
     const leadTime = formatNumber(row.lead_time || row.lead_time_days, 8 + (index % 7));
     const cost = formatNumber(row.product_cost || row.cost, 24000 + index * 3800);
+    const boundedRisk = clamp(Number(riskScore.toFixed(2)), 0.08, 0.95);
+
+    const routeSegments = parseRouteSegments(row.route_segments || row.routeSegments, mode);
+    const explicitRouteGeometry = toCoordinatePath(row.route_geometry || row.routeGeometry);
+    const mergedSegmentGeometry = routeSegments.length ? mergeSegmentCoordinates(routeSegments) : [];
+    const routeGeometry = explicitRouteGeometry.length >= 2
+      ? explicitRouteGeometry
+      : (mergedSegmentGeometry.length >= 2 ? mergedSegmentGeometry : [originCoords, destinationCoords]);
+
+    const providers = routeSegments.length
+      ? Array.from(new Set(routeSegments.map((segment) => segment.provider).filter(Boolean)))
+      : String(row.route_provider || '').split('+').map((provider) => provider.trim()).filter(Boolean);
+    const fallbackUsed = routeSegments.some((segment) => segment.isFallback) || providerImpliesFallback(row.route_provider);
+    const segmentCount = Math.max(routeSegments.length, 1);
+    const explicitQualityScore = formatNumber(row.route_quality_score ?? row.route_quality, Number.NaN);
+    const derivedQualityScore = (1 - boundedRisk) - (fallbackUsed ? 0.14 : 0) - (segmentCount > 2 ? 0.06 : 0) + 0.08;
+    const routeQualityScore = Number.isFinite(explicitQualityScore)
+      ? clamp(explicitQualityScore, 0, 1)
+      : clamp(derivedQualityScore, 0.08, 0.97);
+    const popupCoords = routeGeometry[Math.floor(routeGeometry.length / 2)] || [
+      (originCoords[0] + destinationCoords[0]) / 2,
+      (originCoords[1] + destinationCoords[1]) / 2,
+    ];
 
     const route = {
       id: `route-${index}`,
@@ -183,11 +316,20 @@ export const buildSupplyChainModel = (rows = []) => {
       mode,
       cargo: row.product_name || row.cargo_type || 'Mixed Cargo',
       quantity,
-      riskScore: Math.min(0.95, Math.max(0.08, Number(riskScore.toFixed(2)))),
+      riskScore: boundedRisk,
+      riskLevel: normalizeText(row.route_risk_level) || getRiskLevel(boundedRisk),
       leadTime,
       cost,
-      provider: row.route_provider || (index % 2 === 0 ? 'CargoFlux' : 'Meridian Lanes'),
-      etaShiftDays: Math.round((riskScore * 10) - 2),
+      provider: providers.join(' + ') || row.route_provider || (index % 2 === 0 ? 'CargoFlux' : 'Meridian Lanes'),
+      providers,
+      fallbackUsed,
+      segmentCount,
+      routeSegments,
+      routeGeometry,
+      popupCoords,
+      routeQualityScore: Number(routeQualityScore.toFixed(2)),
+      routeQualityTier: getQualityTier(routeQualityScore),
+      etaShiftDays: Math.round((boundedRisk * 10) - 2),
     };
 
     routes.push(route);
@@ -295,12 +437,24 @@ export const buildSupplyChainModel = (rows = []) => {
       lane: `${route.origin} -> ${route.destination}`,
       mode: route.mode,
       riskScore: route.riskScore,
+      riskLevel: route.riskLevel,
+      qualityScore: route.routeQualityScore,
+      qualityTier: route.routeQualityTier,
+      fallbackUsed: route.fallbackUsed,
+      segmentCount: route.segmentCount,
       etaShiftDays: route.etaShiftDays,
       valueAtRisk: Math.round(route.cost * route.riskScore),
       shipmentCount: Math.max(1, Math.round(route.quantity / 40) + (index % 4)),
       provider: route.provider,
+      providerChain: route.providers.join(' + ') || route.provider,
       cargo: route.cargo,
-      recommendation: route.riskScore > 0.65 ? 'Reroute immediately' : route.riskScore > 0.45 ? 'Monitor + buffer' : 'Keep lane',
+      recommendation: route.riskScore > 0.65
+        ? 'Reroute immediately'
+        : route.fallbackUsed
+          ? 'Validate fallback corridor'
+          : route.riskScore > 0.45
+            ? 'Monitor + buffer'
+            : 'Keep lane',
     }))
     .sort((a, b) => b.riskScore - a.riskScore);
 
@@ -320,6 +474,10 @@ export const buildSupplyChainModel = (rows = []) => {
       onTimeRate,
       valueAtRisk: Math.round(totalValueAtRisk),
       highRiskLanes: lanes.filter((lane) => lane.riskScore >= 0.65).length,
+      fallbackRoutes: lanes.filter((lane) => lane.fallbackUsed).length,
+      avgRouteQuality: lanes.length
+        ? Number((lanes.reduce((sum, lane) => sum + lane.qualityScore, 0) / lanes.length).toFixed(2))
+        : 0,
     },
   };
 };

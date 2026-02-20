@@ -19,6 +19,12 @@ const riskVariant = (value) => {
   return 'success';
 };
 
+const qualityVariant = (tier) => {
+  if (tier === 'strong') return 'success';
+  if (tier === 'watch') return 'warning';
+  return 'danger';
+};
+
 const LanesTable = ({ data = [] }) => {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
@@ -36,6 +42,7 @@ const LanesTable = ({ data = [] }) => {
         <div>
           <p className="font-medium text-foreground">{row.original.lane}</p>
           <p className="text-xs text-foreground-subtle">{row.original.cargo}</p>
+          <p className="text-xs text-foreground-subtle">{row.original.providerChain || row.original.provider}</p>
         </div>
       ),
     },
@@ -56,6 +63,33 @@ const LanesTable = ({ data = [] }) => {
         const value = Number(getValue());
         return <Badge variant={riskVariant(value)}>{Math.round(value * 100)}%</Badge>;
       },
+    },
+    {
+      accessorKey: 'qualityScore',
+      header: ({ column }) => (
+        <button type="button" className="inline-flex items-center gap-1" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          Quality
+          <ArrowDownUp size={13} />
+        </button>
+      ),
+      cell: ({ row, getValue }) => {
+        const value = Number(getValue());
+        return (
+          <Badge variant={qualityVariant(row.original.qualityTier)}>
+            {String(row.original.qualityTier || 'unknown').toUpperCase()} {Math.round(value * 100)}%
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: 'fallbackUsed',
+      header: 'Pathing',
+      cell: ({ getValue, row }) => (
+        <div className="space-y-1">
+          <Badge variant={getValue() ? 'warning' : 'success'}>{getValue() ? 'Fallback' : 'Primary'}</Badge>
+          <p className="text-xs text-foreground-subtle">{row.original.segmentCount || 1} segments</p>
+        </div>
+      ),
     },
     {
       accessorKey: 'etaShiftDays',
@@ -87,7 +121,19 @@ const LanesTable = ({ data = [] }) => {
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, _columnId, filterValue) => row.original.lane.toLowerCase().includes(String(filterValue).toLowerCase()),
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const query = String(filterValue || '').toLowerCase().trim();
+      if (!query) {
+        return true;
+      }
+
+      return [
+        row.original.lane,
+        row.original.cargo,
+        row.original.providerChain || row.original.provider,
+        row.original.mode,
+      ].some((value) => String(value || '').toLowerCase().includes(query));
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

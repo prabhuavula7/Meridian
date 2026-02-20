@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Map, { Layer, Marker, NavigationControl, Popup, Source } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { AlertTriangle } from 'lucide-react';
@@ -19,6 +19,25 @@ const modeColor = {
   multimodal: '#8a8f98',
 };
 
+const ROUTE_LAYER_IDS = {
+  PRIMARY: 'route-lines',
+  FALLBACK: 'route-lines-fallback',
+};
+
+const getQualityVariant = (qualityTier) => {
+  if (qualityTier === 'strong') return 'success';
+  if (qualityTier === 'watch') return 'warning';
+  return 'danger';
+};
+
+const roleLabel = (role) => {
+  const normalized = String(role || 'segment').toLowerCase();
+  if (normalized === 'access') return 'Access';
+  if (normalized === 'egress') return 'Egress';
+  if (normalized === 'main') return 'Main';
+  return 'Connector';
+};
+
 const getRiskCircleColor = (severity) => {
   if (severity === 'high') return '#df5671';
   if (severity === 'medium') return '#d8a550';
@@ -37,24 +56,73 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
   const [selectedIncidentId, setSelectedIncidentId] = useState(focusIncidentId);
   const [mapError, setMapError] = useState(null);
 
+  useEffect(() => {
+    setSelectedIncidentId(focusIncidentId || null);
+    if (focusIncidentId) {
+      setSelectedRouteId(null);
+    }
+  }, [focusIncidentId]);
+
   const activeRoute = routes.find((route) => route.id === selectedRouteId) || null;
   const activeIncident = incidents.find((incident) => incident.id === selectedIncidentId) || null;
+  const activeRouteSegments = activeRoute
+    ? (Array.isArray(activeRoute.routeSegments) && activeRoute.routeSegments.length > 0
+      ? activeRoute.routeSegments
+      : [{
+          id: `${activeRoute.id}-segment-0`,
+          mode: activeRoute.mode,
+          role: 'main',
+          provider: activeRoute.provider,
+          isFallback: Boolean(activeRoute.fallbackUsed),
+        }])
+    : [];
 
-  const lineGeoJson = useMemo(() => ({
-    type: 'FeatureCollection',
-    features: routes.map((route) => ({
-      type: 'Feature',
-      properties: {
-        id: route.id,
-        mode: route.mode,
-        riskScore: route.riskScore,
-      },
-      geometry: {
-        type: 'LineString',
-        coordinates: [route.originCoords, route.destinationCoords],
-      },
-    })),
-  }), [routes]);
+  const lineGeoJson = useMemo(() => {
+    const features = [];
+
+    routes.forEach((route) => {
+      const segments = Array.isArray(route.routeSegments) && route.routeSegments.length > 0
+        ? route.routeSegments
+        : [{
+            id: `${route.id}-segment-0`,
+            mode: route.mode,
+            role: 'main',
+            coordinates: Array.isArray(route.routeGeometry) && route.routeGeometry.length >= 2
+              ? route.routeGeometry
+              : [route.originCoords, route.destinationCoords],
+            provider: route.provider,
+            isFallback: Boolean(route.fallbackUsed),
+          }];
+
+      segments.forEach((segment, segmentIndex) => {
+        const coordinates = Array.isArray(segment.coordinates) && segment.coordinates.length >= 2
+          ? segment.coordinates
+          : [route.originCoords, route.destinationCoords];
+
+        features.push({
+          type: 'Feature',
+          properties: {
+            routeId: route.id,
+            mode: segment.mode || route.mode,
+            riskScore: route.riskScore,
+            provider: segment.provider || route.provider || 'unknown',
+            role: segment.role || 'main',
+            segmentIndex,
+            isFallback: segment.isFallback || route.fallbackUsed ? 1 : 0,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates,
+          },
+        });
+      });
+    });
+
+    return {
+      type: 'FeatureCollection',
+      features,
+    };
+  }, [routes]);
 
   const incidentGeoJson = useMemo(() => ({
     type: 'FeatureCollection',
@@ -73,8 +141,9 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
   }), [incidents]);
 
   const routeLayer = {
-    id: 'route-lines',
+    id: ROUTE_LAYER_IDS.PRIMARY,
     type: 'line',
+    filter: ['==', ['get', 'isFallback'], 0],
     paint: {
       'line-color': [
         'match',
@@ -89,11 +158,43 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
         'interpolate',
         ['linear'],
         ['zoom'],
-        1, 1.5,
-        3, 2.2,
-        6, 3.4,
+        1, 1.6,
+        3, 2.4,
+        6, 3.5,
       ],
-      'line-opacity': 0.72,
+      'line-opacity': 0.76,
+    },
+  };
+
+  const routeFallbackLayer = {
+    id: ROUTE_LAYER_IDS.FALLBACK,
+    type: 'line',
+    filter: ['==', ['get', 'isFallback'], 1],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
+    paint: {
+      'line-color': [
+        'match',
+        ['get', 'mode'],
+        'sea', modeColor.sea,
+        'air', modeColor.air,
+        'road', modeColor.road,
+        'rail', modeColor.rail,
+        modeColor.multimodal,
+      ],
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        1, 1.8,
+        3, 2.6,
+        6, 3.8,
+      ],
+      'line-opacity': 0.68,
+      'line-dasharray': [1.2, 1],
+      'line-blur': 0.1,
     },
   };
 
@@ -155,7 +256,9 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
   const handleMapClick = (event) => {
     const features = event.features || [];
     const incidentFeature = features.find((feature) => feature.layer.id === 'incident-circles');
-    const routeFeature = features.find((feature) => feature.layer.id === 'route-lines');
+    const routeFeature = features.find((feature) =>
+      feature.layer.id === ROUTE_LAYER_IDS.PRIMARY || feature.layer.id === ROUTE_LAYER_IDS.FALLBACK
+    );
 
     if (incidentFeature) {
       setSelectedIncidentId(incidentFeature.properties.id);
@@ -164,7 +267,7 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
     }
 
     if (routeFeature) {
-      setSelectedRouteId(routeFeature.properties.id);
+      setSelectedRouteId(routeFeature.properties.routeId || routeFeature.properties.id);
       setSelectedIncidentId(null);
       return;
     }
@@ -199,7 +302,7 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
         initialViewState={{ longitude: 12, latitude: 20, zoom: 1.7 }}
         mapStyle={STYLE_BY_THEME[theme] || STYLE_BY_THEME.dark}
         mapboxAccessToken={mapboxToken}
-        interactiveLayerIds={['route-lines', 'incident-circles']}
+        interactiveLayerIds={[ROUTE_LAYER_IDS.PRIMARY, ROUTE_LAYER_IDS.FALLBACK, 'incident-circles']}
         onError={(event) => setMapError(event?.error?.message || 'Unable to load map style or tiles.')}
         onClick={handleMapClick}
         reuseMaps
@@ -209,6 +312,7 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
 
         <Source id="routes" type="geojson" data={lineGeoJson}>
           <Layer {...routeLayer} />
+          <Layer {...routeFallbackLayer} />
         </Source>
 
         <Source id="incidents" type="geojson" data={incidentGeoJson}>
@@ -228,16 +332,32 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
 
         {activeRoute ? (
           <Popup
-            longitude={(activeRoute.originCoords[0] + activeRoute.destinationCoords[0]) / 2}
-            latitude={(activeRoute.originCoords[1] + activeRoute.destinationCoords[1]) / 2}
+            longitude={activeRoute.popupCoords ? activeRoute.popupCoords[0] : (activeRoute.originCoords[0] + activeRoute.destinationCoords[0]) / 2}
+            latitude={activeRoute.popupCoords ? activeRoute.popupCoords[1] : (activeRoute.originCoords[1] + activeRoute.destinationCoords[1]) / 2}
             closeButton={false}
             closeOnClick={false}
             className="z-20"
           >
-            <div className="space-y-1 text-xs">
+            <div className="space-y-2 text-xs">
               <p className="font-semibold">{activeRoute.origin} -> {activeRoute.destination}</p>
-              <p>Mode: {activeRoute.mode.toUpperCase()}</p>
-              <p>Risk: {Math.round(activeRoute.riskScore * 100)}%</p>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant="accent">{activeRoute.mode.toUpperCase()}</Badge>
+                <Badge variant={activeRoute.fallbackUsed ? 'warning' : 'success'}>
+                  {activeRoute.fallbackUsed ? 'Fallback path' : 'Primary path'}
+                </Badge>
+                <Badge variant={getQualityVariant(activeRoute.routeQualityTier)}>
+                  Quality {Math.round((activeRoute.routeQualityScore || 0) * 100)}%
+                </Badge>
+              </div>
+              <p>Risk: {Math.round(activeRoute.riskScore * 100)}% ({String(activeRoute.riskLevel || '').toUpperCase()})</p>
+              <p>Segments: {activeRoute.segmentCount || activeRouteSegments.length} | Providers: {activeRoute.providers?.length || 1}</p>
+              <div className="space-y-1 border-t border-border/80 pt-1">
+                {activeRouteSegments.slice(0, 4).map((segment, index) => (
+                  <p key={segment.id || `${activeRoute.id}-segment-${index}`} className="text-[11px] text-foreground-muted">
+                    {index + 1}. {roleLabel(segment.role)} | {(segment.mode || activeRoute.mode).toUpperCase()} | {segment.provider || activeRoute.provider}
+                  </p>
+                ))}
+              </div>
             </div>
           </Popup>
         ) : null}
@@ -268,6 +388,7 @@ const SupplyChainMap = ({ routes = [], hubs = [], incidents = [], theme = 'dark'
         <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: modeColor.sea }} />Sea</span>
         <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: modeColor.air }} />Air</span>
         <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: modeColor.road }} />Road</span>
+        <span className="inline-flex items-center gap-1"><span className="h-[2px] w-3 rounded-sm bg-accent opacity-75" style={{ borderTop: '1px dashed rgba(255,255,255,0.55)' }} />Fallback</span>
         <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: getRiskCircleColor('high') }} />Risk</span>
       </div>
     </div>

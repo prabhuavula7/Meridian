@@ -34,6 +34,20 @@ const InsightsPage = ({ model }) => {
     return model.transportMix.filter((entry) => entry.mode === modeFilter);
   }, [model.transportMix, modeFilter]);
 
+  const scopedFallbackCount = useMemo(
+    () => filteredLanes.filter((lane) => lane.fallbackUsed).length,
+    [filteredLanes]
+  );
+
+  const scopedAverageQuality = useMemo(() => {
+    if (!filteredLanes.length) {
+      return 0;
+    }
+
+    const total = filteredLanes.reduce((sum, lane) => sum + (lane.qualityScore || 0), 0);
+    return total / filteredLanes.length;
+  }, [filteredLanes]);
+
   const resetFilters = () => {
     setModeFilter('all');
     setMinRiskFilter('0');
@@ -81,6 +95,8 @@ const InsightsPage = ({ model }) => {
               Active scope
             </p>
             <p className="mt-1">{filteredLanes.length} lanes currently in focus.</p>
+            <p className="mt-1">{scopedFallbackCount} lanes on fallback corridors.</p>
+            <p className="mt-1">Avg route quality: {Math.round(scopedAverageQuality * 100)}%.</p>
           </div>
         </FilterPanel>
       </div>

@@ -152,6 +152,8 @@ const DisruptionDetailPage = ({ model, theme }) => {
                 </div>
                 <div className="mt-2 space-y-1 text-xs text-foreground-muted">
                   <p>Provider: {lane.provider}</p>
+                  <p>Route quality: {Math.round((lane.qualityScore || 0) * 100)}% ({String(lane.qualityTier || 'n/a').toUpperCase()})</p>
+                  <p>Pathing: {lane.fallbackUsed ? 'Fallback corridor active' : 'Primary corridor stable'}</p>
                   <p>ETA shift: {lane.etaShiftDays > 0 ? '+' : ''}{lane.etaShiftDays} days</p>
                   <p>Value at risk: {currency(lane.valueAtRisk)}</p>
                 </div>
