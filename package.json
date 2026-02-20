@@ -9,14 +9,19 @@
     "setup:env": "cp .env.example .env",
     "start": "npm --prefix frontend start",
     "start:backend": "npm --prefix backend start",
+    "start:backend:py": "node scripts/with-root-env.js sh -c \"cd backend_py && python3 -m uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8000}\"",
     "dev": "echo \"Use separate terminals: npm run dev:backend and npm run dev:frontend\"",
     "dev:frontend": "npm --prefix frontend start",
     "dev:backend": "npm --prefix backend start",
+    "dev:backend:py": "node scripts/with-root-env.js sh -c \"cd backend_py && python3 -m uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT:-8000} --reload\"",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "npm --prefix frontend run build",
     "build:backend": "npm --prefix backend run build",
     "start:backend:prod": "npm --prefix backend run start:prod",
     "test": "npm --prefix frontend run test && npm --prefix backend run test",
+    "compose:up": "docker compose up -d postgres redis backend_py_api backend_py_worker",
+    "compose:down": "docker compose down",
+    "compose:logs": "docker compose logs -f --tail=150 backend_py_api backend_py_worker postgres redis",
     "clean": "rm -rf frontend/build backend/dist"
   }
 }

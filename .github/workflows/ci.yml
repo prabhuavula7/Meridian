@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Frontend test
+        run: npm --prefix frontend run test
+
+      - name: Frontend build
+        run: npm --prefix frontend run build
+
+  backend_ts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
+
+      - name: Backend typecheck
+        run: npm --prefix backend run typecheck
+
+      - name: Backend tests
+        run: npm --prefix backend run test
+
+  backend_py:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python backend dependencies
+        run: pip install -e "./backend_py[dev]"
+
+      - name: Python backend compile check
+        run: python -m compileall backend_py/app backend_py/tests
+
+      - name: Python backend tests
+        run: python -m pytest backend_py/tests -q
+

@@ -15,6 +15,37 @@ class JsonFormatter(logging.Formatter):
             "request_id": get_request_id(),
         }
 
+        reserved = {
+            "name",
+            "msg",
+            "args",
+            "levelname",
+            "levelno",
+            "pathname",
+            "filename",
+            "module",
+            "exc_info",
+            "exc_text",
+            "stack_info",
+            "lineno",
+            "funcName",
+            "created",
+            "msecs",
+            "relativeCreated",
+            "thread",
+            "threadName",
+            "processName",
+            "process",
+            "message",
+        }
+        extra_fields = {
+            key: value
+            for key, value in record.__dict__.items()
+            if key not in reserved and isinstance(value, (str, int, float, bool, type(None)))
+        }
+        if extra_fields:
+            payload["extra"] = extra_fields
+
         if record.exc_info:
             payload["exception"] = self.formatException(record.exc_info)
 

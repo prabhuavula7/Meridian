@@ -31,7 +31,14 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def on_startup() -> None:
-    logger.info("python backend startup complete")
+    logger.info(
+        "python backend startup complete",
+        extra={
+            "app_env": settings.app_env,
+            "app_port": settings.app_port,
+            "legacy_backend_base_url": settings.legacy_backend_base_url,
+        },
+    )
 
 
 @app.get("/health")

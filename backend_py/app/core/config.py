@@ -16,6 +16,8 @@ class Settings(BaseSettings):
 
     database_url: str | None = None
     redis_url: str | None = None
+    legacy_backend_base_url: str = "http://localhost:5050/api/v1"
+    legacy_proxy_timeout_ms: int = 20000
 
     model_config = SettingsConfigDict(
         env_file=str(ROOT_ENV_PATH),

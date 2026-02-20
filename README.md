@@ -11,6 +11,7 @@ Meridian AI is a monorepo for supply-chain disruption intelligence. It combines 
 - `backend_py/` FastAPI scaffold (Phase 0A) with:
   - request-id middleware + JSON logging
   - dependency-aware health checks (`/health`, `/api/v1/health`)
+  - compatibility proxy endpoints for gradual migration from `backend/`
 - Root workspace scripts orchestrate frontend/backend via npm.
 
 ## Product Surfaces
@@ -70,6 +71,7 @@ Minimum recommended values:
 - `REACT_APP_API_BASE_URL=http://localhost:5050/api/v1`
 - `REACT_APP_MAPBOX_ACCESS_TOKEN=...` (recommended for map rendering)
 - `OPENAI_API_KEY=...`
+- `LEGACY_BACKEND_BASE_URL=http://localhost:5050/api/v1` (for backend_py compatibility proxy)
 
 ## Run Locally
 
@@ -103,6 +105,27 @@ Health endpoints:
 - `http://localhost:8000/health`
 - `http://localhost:8000/api/v1/health`
 
+Compatibility proxy endpoints (served by backend_py):
+
+- `POST http://localhost:8000/api/v1/routes/enrich`
+- `POST http://localhost:8000/api/v1/analyze-supply-chain`
+- `GET http://localhost:8000/api/v1/analysis/health`
+- `GET http://localhost:8000/api/v1/analysis/stats`
+
+## Foundation Compose Stack
+
+```bash
+npm run compose:up
+npm run compose:logs
+```
+
+Services:
+
+- `postgres` (default port `5432`)
+- `redis` (default port `6379`)
+- `backend_py_api` (default port `8000`)
+- `backend_py_worker` (background heartbeat worker)
+
 ## Build and Test
 
 ```bash
@@ -133,6 +156,9 @@ Root:
 - `npm run dev:backend`
 - `npm run build`
 - `npm test`
+- `npm run compose:up`
+- `npm run compose:down`
+- `npm run compose:logs`
 
 Backend:
 
