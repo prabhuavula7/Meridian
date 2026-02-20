@@ -1,0 +1,137 @@
+{
+  "supplyChainData": {
+    "locations": [
+      {
+        "id": "loc_001",
+        "name": "Shanghai Port",
+        "coordinates": [121.4737, 31.2304],
+        "type": "port",
+        "status": "operational",
+        "capacityUtilization": 85
+      },
+      {
+        "id": "loc_002",
+        "name": "Los Angeles Port",
+        "coordinates": [-118.2437, 34.0522],
+        "type": "port",
+        "status": "operational",
+        "capacityUtilization": 78
+      },
+      {
+        "id": "loc_003",
+        "name": "Rotterdam Port",
+        "coordinates": [4.4792, 51.9225],
+        "type": "port",
+        "status": "operational",
+        "capacityUtilization": 82
+      }
+    ],
+    "routes": [
+      {
+        "id": "route_001",
+        "origin": {
+          "id": "loc_001",
+          "name": "Shanghai Port",
+          "coordinates": [121.4737, 31.2304],
+          "type": "port",
+          "status": "operational",
+          "capacityUtilization": 85
+        },
+        "destination": {
+          "id": "loc_002",
+          "name": "Los Angeles Port",
+          "coordinates": [-118.2437, 34.0522],
+          "type": "port",
+          "status": "operational",
+          "capacityUtilization": 78
+        },
+        "transportMode": "sea",
+        "transitTime": 25,
+        "status": "active",
+        "costPerUnit": 15.50,
+        "volumeCapacity": 1500,
+        "utilization": 92
+      },
+      {
+        "id": "route_002",
+        "origin": {
+          "id": "loc_001",
+          "name": "Shanghai Port",
+          "coordinates": [121.4737, 31.2304],
+          "type": "port",
+          "status": "operational",
+          "capacityUtilization": 85
+        },
+        "destination": {
+          "id": "loc_003",
+          "name": "Rotterdam Port",
+          "coordinates": [4.4792, 51.9225],
+          "type": "port",
+          "status": "operational",
+          "capacityUtilization": 82
+        },
+        "transportMode": "sea",
+        "transitTime": 35,
+        "status": "active",
+        "costPerUnit": 18.75,
+        "volumeCapacity": 1200,
+        "utilization": 88
+      }
+    ],
+    "products": [
+      {
+        "id": "prod_001",
+        "name": "Electronics Components",
+        "category": "Electronics",
+        "sku": "ELEC-001",
+        "unitCost": 15.50,
+        "inventoryLevel": 1500,
+        "reorderPoint": 300,
+        "leadTime": 25
+      },
+      {
+        "id": "prod_002",
+        "name": "Textile Materials",
+        "category": "Textiles",
+        "sku": "TEXT-001",
+        "unitCost": 8.25,
+        "inventoryLevel": 2500,
+        "reorderPoint": 500,
+        "leadTime": 35
+      }
+    ],
+    "incidents": [
+      {
+        "id": "inc_001",
+        "type": "technical_failure",
+        "severity": 3,
+        "location": {
+          "id": "loc_001",
+          "name": "Shanghai Port",
+          "coordinates": [121.4737, 31.2304],
+          "type": "port",
+          "status": "operational",
+          "capacityUtilization": 85
+        },
+        "description": "Equipment malfunction affecting loading operations",
+        "startTime": "2024-01-15T08:00:00.000Z",
+        "estimatedResolutionTime": "2024-01-16T08:00:00.000Z",
+        "status": "active",
+        "affectedRoutes": ["route_001", "route_002"],
+        "estimatedFinancialImpact": 50000
+      }
+    ],
+    "metadata": {
+      "source": "test_upload",
+      "lastUpdated": "2024-01-15T10:00:00.000Z",
+      "version": "1.0",
+      "totalRecords": 8
+    }
+  },
+  "customPrompt": "Focus on potential natural disaster scenarios and their impact on shipping routes",
+  "preferences": {
+    "focusAreas": ["natural_disasters", "shipping_lanes", "port_operations"],
+    "riskTolerance": "medium",
+    "timeHorizon": 30
+  }
+}

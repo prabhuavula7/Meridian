@@ -1,0 +1,11 @@
+Warehouse_Location,Origin_Point,Destination_Point,Transport_Mode,Lead_Time_Days,Product_Name,Unit_Cost,Quantity_Units,Supplier_Name,Customer_ID,Order_Reference
+Shanghai DC,Shanghai Port,Los Angeles Port,Sea Freight,25,Electronics Components,15.50,1500,Shanghai Electronics,LA_CUST_001,PO-2024-001
+Rotterdam Hub,Rotterdam Port,New York Port,Ocean Shipping,18,Automotive Parts,22.75,2200,Rotterdam Auto,NY_CUST_002,PO-2024-002
+Singapore Warehouse,Singapore Port,Dubai Port,Container Ship,12,Petroleum Products,8.90,1800,Singapore Petro,Dubai_CUST_003,PO-2024-003
+Tokyo Distribution Center,Tokyo Port,Sydney Port,Maritime,20,Consumer Goods,12.30,1200,Tokyo Consumer,Sydney_CUST_004,PO-2024-004
+Mumbai Facility,Mumbai Port,Hamburg Port,Ocean Freight,22,Textile Materials,6.45,900,Mumbai Textiles,Hamburg_CUST_005,PO-2024-005
+Los Angeles Warehouse,LA Port,Shanghai Port,Sea Transport,28,Agricultural Products,9.20,1100,LA Agriculture,Shanghai_CUST_006,PO-2024-006
+Dubai Hub,Dubai Port,Rotterdam Port,Container Freight,16,Oil & Gas,18.75,2000,Dubai Energy,Rotterdam_CUST_007,PO-2024-007
+Hamburg Distribution,Hamburg Port,Singapore Port,Maritime Shipping,19,Industrial Equipment,25.60,1600,Hamburg Industrial,Singapore_CUST_008,PO-2024-008
+New York Warehouse,NY Port,Tokyo Port,Ocean Transport,24,Electronics,19.80,1400,NY Electronics,Tokyo_CUST_009,PO-2024-009
+Sydney Facility,Sydney Port,Mumbai Port,Sea Freight,21,Minerals & Ores,4.20,800,Sydney Mining,Mumbai_CUST_010,PO-2024-010

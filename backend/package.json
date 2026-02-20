@@ -1,0 +1,42 @@
+{
+  "name": "supply-chain-ai-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Supply Chain AI Analysis with OpenAI GPT-4 integration",
+  "main": "dist/server.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "start": "nodemon --legacy-watch --watch src --ext ts --exec ts-node src/server.ts",
+    "start:prod": "node dist/server.js",
+    "dev": "npm run start",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('No backend tests configured yet.')\""
+  },
+  "keywords": [
+    "supply-chain",
+    "ai",
+    "openai",
+    "gpt-4",
+    "analysis"
+  ],
+  "author": "BentTech.AI Team",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "joi": "^17.11.0",
+    "morgan": "^1.10.0",
+    "openai": "^4.20.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.2.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
