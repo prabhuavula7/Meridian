@@ -71,6 +71,7 @@ Minimum recommended values:
 - `REACT_APP_API_BASE_URL=http://localhost:5050/api/v1`
 - `REACT_APP_MAPBOX_ACCESS_TOKEN=...` (recommended for map rendering)
 - `OPENAI_API_KEY=...`
+- `FRONTEND_PORT=3000`
 - `LEGACY_BACKEND_BASE_URL=http://localhost:5050/api/v1` (for backend_py compatibility proxy)
 
 ## Run Locally

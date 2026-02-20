@@ -73,6 +73,11 @@ Object.entries(envValues).forEach(([key, value]) => {
   }
 });
 
+if (command.includes('react-scripts')) {
+  const frontendPort = mergedEnv.FRONTEND_PORT || envValues.FRONTEND_PORT || '3000';
+  mergedEnv.PORT = String(frontendPort);
+}
+
 const child = spawn(command, args, {
   stdio: 'inherit',
   env: mergedEnv,
