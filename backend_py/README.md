@@ -17,6 +17,10 @@ Environment variables are sourced from the repository root `.env`.
   - `POST /api/v1/analyze-supply-chain`
   - `GET /api/v1/analysis/health`
   - `GET /api/v1/analysis/stats`
+- Ingestion endpoints:
+  - `POST /api/v1/ingest/upload`
+  - `GET /api/v1/ingest/uploads`
+  - `GET /api/v1/ingest/uploads/{upload_id}`
 - Dependency checks for Postgres and Redis.
 
 ## Quickstart (uv)
@@ -47,6 +51,13 @@ cp .env.example .env
 ```
 
 `DATABASE_URL` and `REDIS_URL` are optional for this scaffold. If absent, health checks return `skipped`.
+
+Ingestion settings in root `.env`:
+
+- `UPLOAD_STORAGE_DIR`
+- `UPLOAD_MANIFEST_PATH`
+- `UPLOAD_MAX_BYTES`
+- `UPLOAD_ALLOWED_EXTENSIONS`
 
 ## Docker Compose
 
