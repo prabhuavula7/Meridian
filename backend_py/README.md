@@ -21,6 +21,8 @@ Environment variables are sourced from the repository root `.env`.
   - `POST /api/v1/ingest/upload`
   - `GET /api/v1/ingest/uploads`
   - `GET /api/v1/ingest/uploads/{upload_id}`
+  - `POST /api/v1/ingest/uploads/{upload_id}/normalize`
+  - `GET /api/v1/ingest/uploads/{upload_id}/normalization`
 - Dependency checks for Postgres and Redis.
 
 ## Quickstart (uv)
@@ -58,6 +60,15 @@ Ingestion settings in root `.env`:
 - `UPLOAD_MANIFEST_PATH`
 - `UPLOAD_MAX_BYTES`
 - `UPLOAD_ALLOWED_EXTENSIONS`
+- `SILVER_STORAGE_DIR`
+- `QUARANTINE_STORAGE_DIR`
+- `NORMALIZATION_REPORT_DIR`
+- `NORMALIZATION_MAX_ERRORS`
+
+Notes:
+
+- Upload accepts CSV/XLSX/XLS for raw bronze ingestion.
+- Phase 1B normalization currently supports CSV input for canonicalization and row-level quality reporting.
 
 ## Docker Compose
 

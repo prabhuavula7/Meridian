@@ -5,7 +5,14 @@ import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 import { getDataStatistics } from '../utils/api';
 import { validateSupplyChainData, validateFileUpload } from '../utils/dataValidation';
-import { analyzeSupplyChain, transformDataForBackend, checkBackendHealth, enrichRoutesForMap } from '../utils/backendApi';
+import {
+  analyzeSupplyChain,
+  transformDataForBackend,
+  checkBackendHealth,
+  enrichRoutesForMap,
+  normalizeIngestionUpload,
+  uploadIngestionFile,
+} from '../utils/backendApi';
 import { debugError, debugLog, debugWarn } from '../utils/logger';
 
 // Standard supply chain field mappings
@@ -83,12 +90,42 @@ const DataUpload = ({ onDataUpload }) => {
         }
         
         const fileData = await processFile(file);
+
+        let ingestionUpload = null;
+        let normalizationTotals = null;
+        let ingestionError = null;
+
+        try {
+          const ingestionResponse = await uploadIngestionFile(file);
+          ingestionUpload = ingestionResponse?.data || null;
+
+          if (ingestionUpload?.upload_id && file.name.toLowerCase().endsWith('.csv')) {
+            const normalizationResponse = await normalizeIngestionUpload(ingestionUpload.upload_id, 100);
+            normalizationTotals = normalizationResponse?.data?.totals || null;
+          }
+        } catch (backendIngestionError) {
+          if (backendIngestionError?.statusCode === 404) {
+            debugLog('DataUpload', 'Ingestion endpoints unavailable on current backend; skipping sync', {
+              file: file.name,
+            });
+          } else {
+            ingestionError = backendIngestionError.message || 'Backend ingestion failed';
+            debugWarn('DataUpload', 'Backend ingestion sync failed', {
+              file: file.name,
+              message: ingestionError,
+            });
+          }
+        }
+
         if (fileData) {
           processedFiles.push({
             name: file.name,
             size: file.size,
             data: fileData,
-            type: file.type
+            type: file.type,
+            ingestionUpload,
+            normalizationTotals,
+            ingestionError,
           });
         }
       }
@@ -400,7 +437,10 @@ const DataUpload = ({ onDataUpload }) => {
         name: 'sample-supply-chain-data.csv',
         size: csvText.length,
         data: parseResults.data,
-        type: 'text/csv'
+        type: 'text/csv',
+        ingestionUpload: null,
+        normalizationTotals: null,
+        ingestionError: null,
       };
       
       setUploadedFiles([sampleFile]);
@@ -588,6 +628,20 @@ const DataUpload = ({ onDataUpload }) => {
                     <p className="text-sm text-foreground-subtle">
                       {(file.size / 1024 / 1024).toFixed(2)} MB • {file.data?.length || 0} rows
                     </p>
+                    {file.ingestionUpload?.upload_id ? (
+                      <p className="text-xs text-foreground-subtle">
+                        Upload ID: {file.ingestionUpload.upload_id}
+                        {file.ingestionUpload.cached ? ' (deduped)' : ''}
+                      </p>
+                    ) : null}
+                    {file.normalizationTotals ? (
+                      <p className="text-xs text-success">
+                        Canonicalized: {file.normalizationTotals.rows_valid}/{file.normalizationTotals.rows_total} valid
+                      </p>
+                    ) : null}
+                    {file.ingestionError ? (
+                      <p className="text-xs text-warning">Backend ingest: {file.ingestionError}</p>
+                    ) : null}
                   </div>
                 </div>
 

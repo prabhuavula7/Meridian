@@ -13,6 +13,7 @@ Meridian AI is a monorepo for supply-chain disruption intelligence. It combines 
   - dependency-aware health checks (`/health`, `/api/v1/health`)
   - compatibility proxy endpoints for gradual migration from `backend/`
   - Phase 1 ingestion endpoints (`/api/v1/ingest/*`) with upload hashing + dedupe metadata
+  - Phase 1B normalization endpoints for canonical shipment validation + quarantine artifacts
 - Root workspace scripts orchestrate frontend/backend via npm.
 
 ## Product Surfaces

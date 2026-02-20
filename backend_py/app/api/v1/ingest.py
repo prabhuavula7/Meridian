@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile
 
 from app.core.config import Settings, get_settings
 from app.services.ingestion_service import get_upload, ingest_upload, list_uploads
+from app.services.normalization_service import get_normalization_report, normalize_upload
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
@@ -43,3 +44,27 @@ async def get_upload_by_id(upload_id: str, settings: Settings = Depends(get_sett
         "data": upload,
     }
 
+
+@router.post("/uploads/{upload_id}/normalize")
+async def normalize_uploaded_file(
+    upload_id: str,
+    max_errors: int = Query(default=100, ge=1, le=1000),
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    report = normalize_upload(settings, upload_id=upload_id, max_errors=max_errors)
+    return {
+        "success": True,
+        "data": report,
+    }
+
+
+@router.get("/uploads/{upload_id}/normalization")
+async def get_uploaded_file_normalization(
+    upload_id: str,
+    settings: Settings = Depends(get_settings),
+) -> dict[str, Any]:
+    report = get_normalization_report(settings, upload_id=upload_id)
+    return {
+        "success": True,
+        "data": report,
+    }

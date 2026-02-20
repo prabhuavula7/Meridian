@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     upload_manifest_path: str = str(BACKEND_PY_ROOT / "data" / "ingestion_manifest.json")
     upload_max_bytes: int = 25 * 1024 * 1024
     upload_allowed_extensions: str = ".csv,.xlsx,.xls"
+    silver_storage_dir: str = str(BACKEND_PY_ROOT / "data" / "silver")
+    quarantine_storage_dir: str = str(BACKEND_PY_ROOT / "data" / "quarantine")
+    normalization_report_dir: str = str(BACKEND_PY_ROOT / "data" / "reports")
+    normalization_max_errors: int = 250
 
     model_config = SettingsConfigDict(
         env_file=str(ROOT_ENV_PATH),

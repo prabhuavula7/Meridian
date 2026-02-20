@@ -89,12 +89,16 @@ class APIError extends Error {
   }
 }
 
+function createRequestId() {
+  return `frontend_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+}
+
 /**
  * Make HTTP request to the backend
  */
 async function makeRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  const requestId = `frontend_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+  const requestId = createRequestId();
   const method = options.method || 'GET';
 
   const defaultOptions = {
@@ -125,7 +129,11 @@ async function makeRequest(endpoint, options = {}) {
         error: responseData?.error,
       });
       throw new APIError(
-        responseData?.error?.message || responseData?.error || response.statusText || 'Request failed',
+        responseData?.error?.message
+          || responseData?.error
+          || responseData?.detail
+          || response.statusText
+          || 'Request failed',
         response.status,
         responseData?.error?.details || [],
         requestId
@@ -268,6 +276,77 @@ export async function checkAnalysisServiceHealth() {
  */
 export async function getAnalysisStats() {
   return makeRequest('/analysis/stats');
+}
+
+/**
+ * Upload raw file to Python ingestion API (bronze layer).
+ */
+export async function uploadIngestionFile(file) {
+  if (!file) {
+    throw new Error('File is required for ingestion upload.');
+  }
+
+  const url = `${API_BASE_URL}/ingest/upload`;
+  const requestId = createRequestId();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  debugLog('backendApi', `Ingestion upload started: ${url}`, {
+    requestId,
+    fileName: file.name,
+    sizeBytes: file.size,
+  });
+
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-Request-ID': requestId,
+      },
+      body: formData,
+    });
+  } catch (error) {
+    throw new APIError(error.message || 'Network error occurred', 0, [], requestId);
+  }
+
+  let responseData = null;
+  try {
+    responseData = await response.json();
+  } catch (_err) {
+    responseData = null;
+  }
+
+  if (!response.ok) {
+    throw new APIError(
+      responseData?.detail || response.statusText || 'Ingestion upload failed',
+      response.status,
+      [],
+      requestId
+    );
+  }
+
+  return APIResponse.fromResponse(responseData || { success: true, data: null });
+}
+
+export async function listIngestionUploads(limit = 20) {
+  return makeRequest(`/ingest/uploads?limit=${limit}`);
+}
+
+export async function normalizeIngestionUpload(uploadId, maxErrors = 100) {
+  if (!uploadId) {
+    throw new Error('uploadId is required.');
+  }
+  return makeRequest(`/ingest/uploads/${uploadId}/normalize?max_errors=${maxErrors}`, {
+    method: 'POST',
+  });
+}
+
+export async function getIngestionNormalization(uploadId) {
+  if (!uploadId) {
+    throw new Error('uploadId is required.');
+  }
+  return makeRequest(`/ingest/uploads/${uploadId}/normalization`);
 }
 
 const FIELD_ALIASES = {
