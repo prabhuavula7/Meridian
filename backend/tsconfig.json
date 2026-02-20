@@ -23,6 +23,7 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
+    "types": ["node"],
     "allowUnusedLabels": false,
     "allowUnreachableCode": false
   },

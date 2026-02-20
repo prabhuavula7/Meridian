@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, ClipboardCopy, RefreshCw, RotateCcw, Search } from 'lucide-react';
+import { Button } from './ui/button';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -95,90 +96,90 @@ Component Stack: ${errorInfo?.componentStack}
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full">
-            <div className="card p-8 text-center">
+        <div className="flex min-h-screen items-center justify-center bg-background-deep p-4">
+          <div className="w-full max-w-2xl">
+            <div className="surface rounded-lg p-8 text-center">
               {/* Error Icon */}
-              <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertTriangle size={40} className="text-white" />
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-danger/45 bg-danger/14">
+                <AlertTriangle size={40} className="text-danger" />
               </div>
 
               {/* Error Message */}
-              <h1 className="text-2xl font-bold text-white mb-4">
+              <h1 className="mb-4 text-2xl font-bold text-foreground">
                 Something went wrong
               </h1>
               
-              <p className="text-dark-300 mb-6">
+              <p className="mb-6 text-foreground-muted">
                 We've encountered an unexpected error. Our team has been notified and is working to fix it.
               </p>
 
               {/* Error ID */}
-              <div className="bg-dark-800 rounded-lg p-4 mb-6">
-                <p className="text-sm text-dark-400 mb-2">Error ID:</p>
-                <code className="text-primary-400 font-mono text-sm break-all">
+              <div className="mb-6 rounded-lg border border-border bg-surface-hover/65 p-4">
+                <p className="mb-2 text-sm text-foreground-subtle">Error ID:</p>
+                <code className="break-all font-mono text-sm text-accent-glow">
                   {this.state.errorId}
                 </code>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
+              <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                <Button
                   onClick={this.handleRetry}
-                  className="btn-primary"
+                  variant="primary"
                 >
                   <span className="inline-flex items-center gap-2">
                     <RotateCcw size={16} />
                     <span>Try Again</span>
                   </span>
-                </button>
+                </Button>
                 
-                <button
+                <Button
                   onClick={this.handleReportError}
-                  className="btn-secondary"
+                  variant="secondary"
                 >
                   <span className="inline-flex items-center gap-2">
                     <ClipboardCopy size={16} />
                     <span>Copy Error Report</span>
                   </span>
-                </button>
+                </Button>
                 
-                <button
+                <Button
                   onClick={() => window.location.reload()}
-                  className="btn-secondary"
+                  variant="secondary"
                 >
                   <span className="inline-flex items-center gap-2">
                     <RefreshCw size={16} />
                     <span>Reload Page</span>
                   </span>
-                </button>
+                </Button>
               </div>
 
               {/* Error Details (Collapsible) */}
               <details className="mt-6 text-left">
-                <summary className="cursor-pointer text-primary-400 hover:text-primary-300 mb-2">
+                <summary className="mb-2 cursor-pointer text-accent-glow hover:text-accent">
                   <span className="inline-flex items-center gap-2">
                     <Search size={16} />
                     <span>Show Error Details</span>
                   </span>
                 </summary>
-                <div className="bg-dark-800 rounded-lg p-4 text-sm">
+                <div className="rounded-lg border border-border bg-surface-hover/65 p-4 text-sm">
                   <div className="mb-4">
-                    <h4 className="font-semibold text-white mb-2">Error Message:</h4>
-                    <pre className="text-red-400 bg-dark-900 p-2 rounded overflow-x-auto">
+                    <h4 className="mb-2 font-semibold text-foreground">Error Message:</h4>
+                    <pre className="overflow-x-auto rounded border border-danger/35 bg-danger/12 p-2 text-danger">
                       {this.state.error?.toString()}
                     </pre>
                   </div>
                   
                   <div className="mb-4">
-                    <h4 className="font-semibold text-white mb-2">Component Stack:</h4>
-                    <pre className="text-yellow-400 bg-dark-900 p-2 rounded overflow-x-auto text-xs">
+                    <h4 className="mb-2 font-semibold text-foreground">Component Stack:</h4>
+                    <pre className="overflow-x-auto rounded border border-warning/35 bg-warning/12 p-2 text-xs text-warning">
                       {this.state.errorInfo?.componentStack}
                     </pre>
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold text-white mb-2">Error Stack:</h4>
-                    <pre className="text-blue-400 bg-dark-900 p-2 rounded overflow-x-auto text-xs">
+                    <h4 className="mb-2 font-semibold text-foreground">Error Stack:</h4>
+                    <pre className="overflow-x-auto rounded border border-info/35 bg-info/12 p-2 text-xs text-info">
                       {this.state.error?.stack}
                     </pre>
                   </div>

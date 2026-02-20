@@ -31,7 +31,7 @@ function App() {
     { id: 'insights', label: 'Insights', icon: ChartNoAxesCombined, badge: model.kpis.highRiskLanes ? `${model.kpis.highRiskLanes}` : null },
     { id: 'disruption', label: 'Disruption Detail', icon: AlertTriangle },
     { id: 'upload', label: 'Data Upload', icon: Upload },
-    { id: 'openai', label: 'OpenAI Config', icon: Wrench },
+    { id: 'openai', label: 'Settings', icon: Wrench },
   ]), [model.kpis.highRiskLanes]);
 
   const alerts = useMemo(
@@ -88,8 +88,8 @@ function App() {
 
     if (activeView === 'openai') {
       return (
-        <Suspense fallback={<LoadingView label="model configuration" />}>
-          <OpenAIPage onConfigured={() => setActiveView('dashboard')} />
+        <Suspense fallback={<LoadingView label="settings workspace" />}>
+          <OpenAIPage />
         </Suspense>
       );
     }

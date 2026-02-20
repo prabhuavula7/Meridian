@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { CircleCheckBig, CircleX, Info, KeyRound } from 'lucide-react';
 import { testOpenAIConnection } from '../services/openaiService';
 import { debugError, debugLog } from '../utils/logger';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 
 const OpenAIConfig = ({ onConfigComplete }) => {
   const [apiKey, setApiKey] = useState('');
@@ -65,92 +67,97 @@ const OpenAIConfig = ({ onConfigComplete }) => {
     debugLog('OpenAIConfig', 'API key cleared from localStorage');
   };
 
+  const canContinue = typeof onConfigComplete === 'function';
+
   if (isConfigured) {
     return (
-      <div className="card p-6 text-center">
-        <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="surface rounded-lg p-6 text-center">
+        <div className="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full border border-success/40 bg-success/15 text-success">
+          <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-white mb-2">OpenAI API Configured!</h3>
-        <p className="text-dark-300 mb-4">
-          Your OpenAI API key is configured and ready to use for AI-powered supply chain analysis.
+        <h3 className="mb-2 text-lg font-semibold text-foreground">OpenAI API Configured</h3>
+        <p className="mb-4 text-sm text-foreground-muted">
+          Your API key is saved and available for AI-powered supply chain analysis.
         </p>
-        <div className="flex justify-center space-x-4">
-          <button
+        <div className="flex justify-center gap-3">
+          <Button
             onClick={handleClearKey}
-            className="btn-secondary"
+            variant="secondary"
           >
             Change API Key
-          </button>
-          <button
-            onClick={() => onConfigComplete && onConfigComplete(apiKey)}
-            className="btn-primary"
-          >
-            Continue to Analysis
-          </button>
+          </Button>
+          {canContinue ? (
+            <Button
+              onClick={() => onConfigComplete(apiKey)}
+              variant="primary"
+            >
+              Continue to Analysis
+            </Button>
+          ) : null}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="card p-6">
-      <h3 className="text-lg font-semibold text-white mb-4 inline-flex items-center gap-2">
+    <div className="surface rounded-lg p-6">
+      <h3 className="mb-4 inline-flex items-center gap-2 text-lg font-semibold text-foreground">
         <KeyRound size={18} />
         <span>Configure OpenAI API</span>
       </h3>
       
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-foreground-muted">
             OpenAI API Key
           </label>
-          <input
+          <Input
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-..."
-            className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
-          <p className="text-xs text-dark-400 mt-1">
+          <p className="mt-1 text-xs text-foreground-subtle">
             Get your API key from{' '}
             <a 
               href="https://platform.openai.com/api-keys" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-primary-400 hover:underline"
+              className="text-accent-glow hover:underline"
             >
               OpenAI Platform
             </a>
           </p>
         </div>
 
-        <div className="flex space-x-3">
-          <button
+        <div className="flex gap-3">
+          <Button
             onClick={handleTestConnection}
             disabled={isTesting || !apiKey.trim()}
-            className="btn-primary flex-1"
+            variant="primary"
+            className="flex-1"
           >
             {isTesting ? 'Testing...' : 'Test Connection'}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSaveKey}
             disabled={!apiKey.trim()}
-            className="btn-secondary flex-1"
+            variant="secondary"
+            className="flex-1"
           >
             Save Key
-          </button>
+          </Button>
         </div>
 
         {testResult && (
-          <div className={`p-3 rounded-lg ${
+          <div className={`rounded-lg border p-3 ${
             testResult.success 
-              ? 'bg-green-900/20 border border-green-700 text-green-300'
-              : 'bg-red-900/20 border border-red-700 text-red-300'
+              ? 'border-success/45 bg-success/12 text-success'
+              : 'border-danger/45 bg-danger/12 text-danger'
           }`}>
-            <p className="text-sm">
+            <p className="text-sm font-medium">
               {testResult.success ? (
                 <CircleCheckBig size={16} className="inline mr-1" />
               ) : (
@@ -161,19 +168,19 @@ const OpenAIConfig = ({ onConfigComplete }) => {
           </div>
         )}
 
-        <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-          <h4 className="font-medium text-blue-400 mb-2 inline-flex items-center gap-2">
+        <div className="rounded-lg border border-info/40 bg-info/10 p-4">
+          <h4 className="mb-2 inline-flex items-center gap-2 font-medium text-info">
             <Info size={16} />
             <span>How to Get Your API Key</span>
           </h4>
-          <ol className="text-sm text-blue-300 space-y-1">
-            <li>1. Go to <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="underline">OpenAI Platform</a></li>
+          <ol className="space-y-1 text-sm text-foreground-muted">
+            <li>1. Go to <a href="https://platform.openai.com" target="_blank" rel="noopener noreferrer" className="underline text-accent-glow">OpenAI Platform</a></li>
             <li>2. Sign in or create an account</li>
             <li>3. Navigate to API Keys section</li>
             <li>4. Create a new API key</li>
             <li>5. Copy and paste it here</li>
           </ol>
-          <p className="text-xs text-blue-400 mt-2">
+          <p className="mt-2 text-xs text-foreground-subtle">
             Note: Keep your API key secure and never share it publicly.
           </p>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, ClipboardList, FlaskConical, Map } from 'lucide-react';
+import { CheckCircle2, ClipboardList, FlaskConical } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
@@ -477,75 +477,69 @@ const DataUpload = ({ onDataUpload }) => {
   };
 
   const renderUploadStep = () => (
-    <div className="grid md:grid-cols-2 gap-8">
-      {/* Upload Area */}
-      <div className="card">
+    <div className="grid gap-6 md:grid-cols-2">
+      <div className="surface rounded-lg p-5">
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
+          className={`rounded-xl border-2 border-dashed p-8 text-center transition-colors duration-200 ${
             isDragActive
-              ? 'border-primary-500 bg-primary-50/10'
-              : 'border-dark-600 hover:border-primary-400 hover:bg-dark-800/50'
-          }`}
+              ? 'border-border-accent bg-accent/10'
+              : 'border-border bg-surface-hover/40 hover:border-border-hover hover:bg-surface-hover/70'
+          } ${isProcessing ? 'pointer-events-none opacity-80' : 'cursor-pointer'}`}
         >
           <input {...getInputProps()} />
-          
           <div className="space-y-4">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary-500 to-accent-600 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-hover text-white shadow-glow">
+              <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
-            
             <div>
-              <p className="text-lg font-medium text-white">
-                {isDragActive ? 'Drop files here' : 'Drag & drop files here'}
+              <p className="text-lg font-medium text-foreground">
+                {isDragActive ? 'Drop files here' : 'Drag and drop files here'}
               </p>
-              <p className="text-dark-400 mt-2">
-                or click to browse
-              </p>
+              <p className="mt-2 text-foreground-subtle">or click to browse</p>
             </div>
-            
-            <div className="text-sm text-dark-400">
-              Supports CSV, XLSX, XLS files
-            </div>
+            <p className="text-sm text-foreground-subtle">Supports CSV, XLSX, XLS files</p>
           </div>
         </div>
 
-        {isProcessing && (
+        {isProcessing ? (
           <div className="mt-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-white">{currentOperation}</span>
-              <span className="text-sm text-primary-400">{progress}%</span>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm text-foreground">{currentOperation}</span>
+              <span className="text-sm font-medium text-accent-glow">{progress}%</span>
             </div>
-            <div className="w-full bg-dark-700 rounded-full h-2">
-              <div 
-                className="bg-primary-500 h-2 rounded-full transition-all duration-300 ease-out"
+            <div className="h-2 w-full rounded-full bg-surface-hover">
+              <div
+                className="h-2 rounded-full bg-accent transition-all duration-300 ease-out"
                 style={{ width: `${progress}%` }}
-              ></div>
+              />
             </div>
-            
-            {/* Processing Steps */}
-            <div className="mt-4 grid grid-cols-5 gap-2">
-              {processingSteps.map((step, index) => (
-                <div 
-                  key={index}
-                  className={`text-xs p-2 rounded text-center ${
-                    progress >= (index * 20) + 20 
-                      ? 'bg-green-600 text-white' 
-                      : progress >= (index * 20)
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-dark-700 text-dark-400'
-                  }`}
-                >
-                  {step}
-                </div>
-              ))}
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {processingSteps.map((step, index) => {
+                const done = progress >= (index * 20) + 20;
+                const active = !done && progress >= (index * 20);
+
+                return (
+                  <div
+                    key={index}
+                    className={`rounded-md border px-2 py-1.5 text-center text-xs ${
+                      done
+                        ? 'border-success/45 bg-success/15 text-success'
+                        : active
+                          ? 'border-border-accent bg-accent/16 text-accent-glow'
+                          : 'border-border bg-surface-hover text-foreground-subtle'
+                    }`}
+                  >
+                    {step}
+                  </div>
+                );
+              })}
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Load Sample Data Button */}
         <div className="mt-6 text-center">
           <button
             onClick={loadSampleData}
@@ -557,52 +551,52 @@ const DataUpload = ({ onDataUpload }) => {
               <span>Load Sample Data</span>
             </span>
           </button>
-          <p className="text-xs text-dark-400 mt-2">
-            Test the platform with sample supply chain data
+          <p className="mt-2 text-xs text-foreground-subtle">
+            Use sample records to validate the complete flow quickly.
           </p>
         </div>
 
-        {error && (
-          <div className="mt-4 p-3 bg-red-900/20 border border-red-700 rounded-lg text-red-400 text-sm">
+        {error ? (
+          <div className="mt-4 rounded-lg border border-danger/40 bg-danger/12 p-3 text-sm text-danger">
             {error}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* File List */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-white mb-4">Uploaded Files</h3>
-        
+      <div className="surface rounded-lg p-5">
+        <h3 className="mb-4 text-lg font-semibold text-foreground">Uploaded Files</h3>
+
         {uploadedFiles.length === 0 ? (
-          <div className="text-center py-8 text-dark-400">
-            <svg className="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="py-10 text-center text-foreground-subtle">
+            <svg className="mx-auto mb-3 h-12 w-12 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p>No files uploaded yet</p>
+            <p>No files uploaded yet.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {uploadedFiles.map((file, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+              <div key={index} className="flex items-center justify-between rounded-lg border border-border bg-surface-hover/65 p-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-600 rounded flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex h-8 w-8 items-center justify-center rounded bg-accent/20 text-accent-glow">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-white font-medium">{file.name}</p>
-                    <p className="text-sm text-dark-400">
+                    <p className="font-medium text-foreground">{file.name}</p>
+                    <p className="text-sm text-foreground-subtle">
                       {(file.size / 1024 / 1024).toFixed(2)} MB • {file.data?.length || 0} rows
                     </p>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={() => removeFile(index)}
-                  className="text-dark-400 hover:text-red-400 transition-colors"
+                  className="text-foreground-subtle transition-colors hover:text-danger"
+                  aria-label={`Remove ${file.name}`}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -615,52 +609,41 @@ const DataUpload = ({ onDataUpload }) => {
   );
 
   const renderCompleteStep = () => (
-    <div className="card text-center">
-      <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="surface rounded-lg p-6 text-center">
+      <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full border border-success/40 bg-success/15 text-success">
+        <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-white mb-2">Data Successfully Processed!</h3>
-      <p className="text-dark-300 mb-4">
-        Your supply chain data has been automatically processed and mapped. You can now view it on the interactive map!
+      <h3 className="text-lg font-semibold text-foreground">Data Successfully Processed</h3>
+      <p className="mt-2 text-sm text-foreground-muted">
+        Your supply chain records have been validated, mapped, and sent to the dashboard model.
       </p>
-      
-      <div className="mt-6">
-        <button 
-          onClick={() => window.location.reload()}
-          className="btn-primary"
-        >
-          <span className="inline-flex items-center gap-2">
-            <Map size={16} />
-            <span>Go to Interactive Map</span>
-          </span>
-        </button>
-        <p className="text-xs text-dark-400 mt-2">
-          The map should now display your data automatically
-        </p>
-      </div>
-      
-      {analysisResults && (
-        <div className="mt-6 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
-          <h4 className="font-medium text-blue-400 mb-2">AI Analysis Complete!</h4>
-          <div className="text-sm text-blue-300 space-y-2">
-            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} />Disaster scenario identified and analyzed</p>
-            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} />Financial and time impact calculated</p>
-            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} />Mitigation strategies generated</p>
-            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} />Risk assessment completed</p>
-            <p className="mt-2 text-white font-medium">
+
+      <p className="mt-4 rounded-lg border border-border bg-surface-hover/65 px-3 py-2 text-xs text-foreground-subtle">
+        Navigation to Dashboard is state-driven. No manual page reload is required.
+      </p>
+
+      {analysisResults ? (
+        <div className="mt-6 rounded-lg border border-info/40 bg-info/10 p-4 text-left">
+          <h4 className="mb-2 font-medium text-info">AI Analysis Complete</h4>
+          <div className="space-y-1.5 text-sm text-foreground-muted">
+            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} className="text-info" />Disruption scenario generated</p>
+            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} className="text-info" />Financial and time impact modeled</p>
+            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} className="text-info" />Mitigation options scored</p>
+            <p className="inline-flex items-center gap-2"><CheckCircle2 size={14} className="text-info" />Risk summary and confidence returned</p>
+            <p className="pt-1 font-medium text-foreground">
               Confidence Score: {Math.round(analysisResults.confidenceScore * 100)}%
             </p>
           </div>
           <div className="mt-4">
-            <button 
-              onClick={() => onDataUpload({ 
-                data: parsedData, 
-                mappings: fieldMappings, 
-                validation: validationResults, 
-                statistics: getDataStatistics(parsedData), 
-                analysisResults: analysisResults
+            <button
+              onClick={() => onDataUpload({
+                data: parsedData,
+                mappings: fieldMappings,
+                validation: validationResults,
+                statistics: getDataStatistics(parsedData),
+                analysisResults,
               })}
               className="btn-primary"
             >
@@ -668,102 +651,80 @@ const DataUpload = ({ onDataUpload }) => {
             </button>
           </div>
         </div>
-      )}
-      
-      {validationResults && validationResults.warnings.length > 0 && (
-        <div className="mt-4 p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg">
-          <h4 className="font-medium text-yellow-400 mb-2">Data Quality Warnings</h4>
-          <div className="text-sm text-yellow-300">
+      ) : null}
+
+      {validationResults && validationResults.warnings.length > 0 ? (
+        <div className="mt-4 rounded-lg border border-warning/40 bg-warning/10 p-4 text-left">
+          <h4 className="mb-2 font-medium text-warning">Data Quality Warnings</h4>
+          <div className="space-y-1 text-sm text-foreground-muted">
             {validationResults.warnings.map((warning, index) => (
               <p key={index}>• {warning}</p>
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="section-title gradient-text">
-          Upload Your Supply Chain Data
-        </h2>
-        <p className="text-dark-300 text-lg max-w-3xl mx-auto">
-          Upload CSV or Excel files with your supply chain data. Our AI will automatically process 
-          and map fields, then take you directly to the interactive map.
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-8 text-center">
+        <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground">Upload Supply Chain Data</h2>
+        <p className="mx-auto mt-2 max-w-3xl text-sm text-foreground-muted md:text-base">
+          Upload CSV or Excel files and Meridian AI will parse, validate, map, and enrich records for the dashboard.
         </p>
       </div>
 
-      {/* Progress Steps */}
-      <div className="flex items-center justify-center mb-8">
-        <div className="flex items-center space-x-4">
-          {['upload', 'process', 'complete'].map((step, index) => (
-            <React.Fragment key={step}>
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                step === 'upload' 
-                  ? 'border-primary-500 bg-primary-500 text-white' 
-                  : step === 'process' && mappingStep !== 'upload'
-                    ? 'border-green-500 bg-green-500 text-white'
-                    : step === 'complete' && mappingStep === 'complete'
-                    ? 'border-green-500 bg-green-500 text-white'
-                    : 'border-dark-600 text-dark-400'
-              }`}>
-                {step === 'upload' ? (
-                  index + 1
-                ) : step === 'process' && mappingStep !== 'upload' ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : step === 'complete' && mappingStep === 'complete' ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  index + 1
-                )}
-              </div>
-              {index < 2 && (
-                <div className={`w-16 h-0.5 ${
-                  step === 'upload' ? 'bg-dark-600' :
-                  step === 'process' && mappingStep !== 'upload' ? 'bg-green-500' :
-                  step === 'complete' && mappingStep === 'complete' ? 'bg-green-500' : 'bg-dark-600'
-                }`} />
-              )}
-            </React.Fragment>
-          ))}
+      <div className="mb-8 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          {['upload', 'process', 'complete'].map((step, index) => {
+            const isActive = step === 'upload'
+              || (step === 'process' && mappingStep !== 'upload')
+              || (step === 'complete' && mappingStep === 'complete');
+
+            return (
+              <React.Fragment key={step}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold ${
+                  isActive
+                    ? 'border-success/45 bg-success/20 text-success'
+                    : 'border-border bg-surface-hover text-foreground-subtle'
+                }`}>
+                  {index + 1}
+                </div>
+                {index < 2 ? (
+                  <div className={`h-px w-16 ${isActive ? 'bg-success/50' : 'bg-border'}`} />
+                ) : null}
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 
-      {/* Step Content */}
-      {mappingStep === 'upload' && renderUploadStep()}
-      {mappingStep === 'complete' && renderCompleteStep()}
+      {mappingStep === 'upload' ? renderUploadStep() : null}
+      {mappingStep === 'complete' ? renderCompleteStep() : null}
 
-      {/* Sample Data Info */}
-      {mappingStep === 'upload' && (
-        <div className="mt-8 card">
-          <h3 className="text-lg font-semibold text-white mb-4 inline-flex items-center gap-2">
+      {mappingStep === 'upload' ? (
+        <div className="surface mt-8 rounded-lg p-5">
+          <h3 className="mb-4 inline-flex items-center gap-2 text-lg font-semibold text-foreground">
             <ClipboardList size={18} />
             <span>Expected Data Format</span>
           </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <h4 className="font-medium text-primary-400 mb-2">Location Data</h4>
-              <p className="text-dark-300 text-sm">
-                Include columns for: warehouse locations, origin/destination points, 
-                facility names, or site identifiers
+              <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-accent-glow">Location Data</h4>
+              <p className="text-sm text-foreground-muted">
+                Include columns for warehouse locations, origin and destination points, facility names, or site identifiers.
               </p>
             </div>
             <div>
-              <h4 className="font-medium text-accent-400 mb-2">Route Information</h4>
-              <p className="text-dark-300 text-sm">
-                Include columns for: routes, transport modes, lead times, 
-                departure/arrival dates, costs, and quantities
+              <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gold">Route Information</h4>
+              <p className="text-sm text-foreground-muted">
+                Include routes, transport modes, lead times, departure and arrival dates, product costs, and quantities.
               </p>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
